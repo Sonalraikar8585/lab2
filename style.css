@@ -1,25 +1,27 @@
+/* ===== Base Styles ===== */
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Segoe UI', Arial, sans-serif;
   background: #f4f4f4;
   margin: 0;
   padding: 0;
+  color: #333;
 }
 
 .container {
   width: 90%;
   max-width: 1000px;
-  margin: auto;
+  margin: 30px auto;
   padding: 20px;
   background: white;
   box-shadow: 0 0 10px #ccc;
-  margin-top: 30px;
 }
 
 h1, h2 {
   text-align: center;
-  color: #333;
+  color: #004080;
 }
 
+/* ===== Form Styling ===== */
 form {
   display: flex;
   flex-wrap: wrap;
@@ -29,9 +31,12 @@ form {
 }
 
 input[type="text"],
-input[type="number"] {
+input[type="number"],
+input[type="date"] {
   padding: 10px;
   width: 150px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
 button {
@@ -39,6 +44,7 @@ button {
   background: #2874a7;
   color: white;
   border: none;
+  border-radius: 5px;
   cursor: pointer;
 }
 
@@ -46,46 +52,30 @@ button:hover {
   background: #005fa3;
 }
 
+/* ===== Seat Grid Styling ===== */
 .seat-grid {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 8px;
   margin-top: 15px;
 }
 
 .seat {
-  padding: 10px;
-  border: 1px solid #ccc;
-  background: white;
+  padding: 6px;
   text-align: center;
+  border: 1px solid #ccc;
+  background-color: #f0f0f0;
   border-radius: 6px;
   min-height: 80px;
   font-size: 14px;
 }
 
 .seat.occupied {
-  background-color: #c8e6c9;
-  border-color: #005fa3;
-  color: #005fa3;
+  background-color: #d1ffd1;
+  border: 2px solid #4CAF50;
 }
 
-@media screen and (max-width: 600px) {
-  .seat-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  form {
-    flex-direction: column;
-    align-items: center;
-  }
-}
-
-.red-text {
-  color: red;
-  font-weight: bold;
-}
-
-/* Table Styling */
+/* ===== Fees Table Styling ===== */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -108,6 +98,7 @@ table th, table td {
   color: red;
 }
 
+/* ===== History Block ===== */
 .history-block {
   border: 1px solid #ccc;
   padding: 10px;
@@ -116,78 +107,31 @@ table th, table td {
   border-left: 4px solid #0077cc;
 }
 
-
-/* Base styles */
-body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #f9f9f9;
-  color: #333;
-}
-
-/* Dashboard container */
-.dashboard-container {
-  max-width: 900px;
-  margin: auto;
-  padding: 30px 20px;
-  text-align: center;
-}
-
-.dashboard-container h1 {
-  font-size: 32px;
-  color: #004080;
-  margin-bottom: 20px;
-}
-
-/* Admin info text */
-.admin-info {
-  background: #ffffff;
-  border: 1px solid #d0d0d0;
-  border-radius: 10px;
-  padding: 20px;
-  text-align: left;
-  font-size: 16px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  margin-bottom: 30px;
-}
-
-.admin-info ul {
-  margin-top: 10px;
-  padding-left: 20px;
-}
-
-.admin-info li {
-  margin: 8px 0;
-}
-
-/* Dashboard buttons */
-.dashboard-buttons {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
-.dashboard-buttons button {
-  background-color: #0077cc;
+.history-block button {
+  background-color: #e74c3c;
   color: white;
-  padding: 14px 28px;
-  font-size: 18px;
   border: none;
-  border-radius: 8px;
+  padding: 3px 8px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0, 119, 204, 0.2);
+  margin-left: 8px;
 }
 
-.dashboard-buttons button:hover {
-  background-color: #005fa3;
-  transform: translateY(-2px);
+.history-block button:hover {
+  background-color: #c0392b;
 }
 
-/* Responsive layout */
+/* ===== Responsive Layout ===== */
 @media screen and (max-width: 600px) {
+  .seat-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  form {
+    flex-direction: column;
+    align-items: center;
+  }
+
   .dashboard-buttons {
     flex-direction: column;
     gap: 15px;

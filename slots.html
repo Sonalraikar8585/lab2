@@ -1,15 +1,16 @@
+
 <!DOCTYPE html>
 <html>
 <head>
-    
   <title>Slot Allocation</title>
-   <button onclick="location.href='index.html'">Back to Dashboard</button>
+  <button onclick="location.href='index.html'">Back to Dashboard</button>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
     <h1>Slot Allocation</h1>
 
+    <!-- Morning Slot -->
     <div class="slot-section">
       <h2>Morning Slot (80 Seats)</h2>
       <form onsubmit="assignSeat(event, 'morning')">
@@ -20,19 +21,20 @@
       <div id="morningTable" class="seat-grid"></div>
     </div>
 
+    <!-- Afternoon Slot -->
     <div class="slot-section">
       <h2>Afternoon Slot (80 Seats)</h2>
       <form onsubmit="assignSeat(event, 'afternoon')">
-        <input type="number" min="1" max="80" id="afternoonSeat" placeholder="Seat No" required />
-        <input type="text" id="afternoonName" placeholder="Student Name" required />
-        <button type="submit">Assign</button>
-      </form>
-      <div id="afternoonTable" class="seat-grid"></div>
+          <input type="number" min="1" max="80" id="afternoonSeat" placeholder="Seat No" required />
+          <input type="text" id="afternoonName" placeholder="Student Name" required />
+          <button type="submit">Assign</button>
+        </form>
+        <div id="afternoonTable" class="seat-grid"></div>
+
     </div>
 
-   
   </div>
 
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>

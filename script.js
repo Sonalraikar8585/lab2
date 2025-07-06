@@ -1,11 +1,30 @@
-// ---------- FEES PAGE ----------
-// ---------- FEES PAGE ----------
+// ===== Firebase Initialization =====
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import {
+  getDatabase,
+  ref,
+  get,
+  set
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBrqtnu4N5VWBHeHgyJyHTKxi1e9hZ54T4",
+  authDomain: "abhyasika-aa210.firebaseapp.com",
+  databaseURL: "https://abhyasika-aa210-default-rtdb.firebaseio.com",
+  projectId: "abhyasika-aa210",
+  storageBucket: "abhyasika-aa210.appspot.com",
+  messagingSenderId: "1020147836926",
+  appId: "1:1020147836926:web:435a4f416899d52cd7c2af",
+  measurementId: "G-6RPJ4NV84E"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// ===== Utility Functions =====
 function formatDateToDDMMYY(dateStr) {
   const d = new Date(dateStr);
-  const dd = String(d.getDate()).padStart(2, '0');
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const yy = String(d.getFullYear()).slice(-2);
-  return `${dd}-${mm}-${yy}`;
+  return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear().toString().slice(-2)}`;
 }
 
 function getNextMonthDate(dateStr) {
@@ -18,250 +37,248 @@ function isDue(paidDateStr) {
   const paidDate = new Date(paidDateStr);
   const nextDue = new Date(paidDate);
   nextDue.setMonth(nextDue.getMonth() + 1);
-
+  const dueCheck = new Date(nextDue.setDate(nextDue.getDate() - 1));
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-
-  const dueCheck = new Date(nextDue.setDate(nextDue.getDate() - 1));
   return today >= dueCheck;
 }
 
-function getFeesData() {
-  return JSON.parse(localStorage.getItem('feesData')) || [];
+// ===== Firebase Helpers =====
+async function getData(path) {
+  const snap = await get(ref(db, path));
+  return snap.exists() ? snap.val() : null;
 }
 
-function saveFeesData(data) {
-  localStorage.setItem('feesData', JSON.stringify(data));
+async function setData(path, data) {
+  return await set(ref(db, path), data);
 }
 
-function getHistoryData() {
-  return JSON.parse(localStorage.getItem('feesHistory')) || {};
-}
-
-function saveHistoryData(history) {
-  localStorage.setItem('feesHistory', JSON.stringify(history));
-}
-
-function displayFees() {
-  const feesTable = document.getElementById('feesTable')?.querySelector('tbody');
-  if (!feesTable) return;
-
-  feesTable.innerHTML = '';
-  const data = getFeesData();
+// ===== Fees Logic =====
+window.displayFees = async function () {
+  const tbody = document.querySelector('#feesTable tbody');
+  if (!tbody) return;
+  const data = await getData('feesData') || [];
+  tbody.innerHTML = '';
 
   data.forEach((item, index) => {
     const paidDateFormatted = formatDateToDDMMYY(item.paidDate);
-    const nextDate = getNextMonthDate(item.paidDate);
-    const nextDateFormatted = formatDateToDDMMYY(nextDate);
+    const nextDateFormatted = formatDateToDDMMYY(getNextMonthDate(item.paidDate));
     const due = isDue(item.paidDate);
 
     const tr = document.createElement('tr');
-
     if (item.isEditing) {
       tr.innerHTML = `
-        <td><input type="text" value="${item.name}" id="edit-name-${index}" /></td>
-        <td><input type="text" value="${item.timing}" id="edit-timing-${index}" /></td>
-        <td><input type="date" value="${item.paidDate}" id="edit-date-${index}" /></td>
+        <td>${index + 1}</td>
+        <td><input id="edit-name-${index}" value="${item.name}" /></td>
+        <td><input id="edit-timing-${index}" value="${item.timing}" /></td>
+        <td><input type="date" id="edit-date-${index}" value="${item.paidDate}" /></td>
         <td>${nextDateFormatted}</td>
         <td colspan="2">
           <button onclick="saveEdit(${index})">Save</button>
           <button onclick="cancelEdit(${index})">Cancel</button>
-        </td>
-      `;
+        </td>`;
     } else {
       tr.innerHTML = `
+        <td>${index + 1}</td>
         <td>${item.name}</td>
         <td>${item.timing}</td>
         <td>${paidDateFormatted}</td>
-        <td class="${due ? 'red-text' : ''}">
-          ${nextDateFormatted}
-          ${due ? '<br><span class="alert"> Fees to be collected!</span>' : ''}
-        </td>
-        <td>
-          ${!item.paid ? `<input type="checkbox" onchange="markAsPaid(${index})" />` : ' Paid'}
-        </td>
-        <td>
-          <button onclick="editFee(${index})">Update</button>
-          <button onclick="removeFee(${index})">Remove</button>
-        </td>
-      `;
+        <td class="${due ? 'red-text' : ''}">${nextDateFormatted}${due ? '<br><span class="alert">Fees to be collected!</span>' : ''}</td>
+        <td>${!item.paid ? `<input type="checkbox" onchange="markAsPaid(${index})" />` : '✅ Paid'}</td>
+        <td><button onclick="editFee(${index})">Update</button><button onclick="removeFee(${index})">Remove</button></td>`;
     }
-
-    feesTable.appendChild(tr);
+    tbody.appendChild(tr);
   });
-}
+};
 
-function removeFee(index) {
-  const data = getFeesData();
+window.removeFee = async function (index) {
+  const data = await getData('feesData') || [];
   data.splice(index, 1);
-  saveFeesData(data);
+  await setData('feesData', data);
   displayFees();
-}
+};
 
-function editFee(index) {
-  const data = getFeesData();
+window.editFee = async function (index) {
+  const data = await getData('feesData') || [];
   data[index].isEditing = true;
-  saveFeesData(data);
+  await setData('feesData', data);
   displayFees();
-}
+};
 
-function cancelEdit(index) {
-  const data = getFeesData();
+window.cancelEdit = async function (index) {
+  const data = await getData('feesData') || [];
   delete data[index].isEditing;
-  saveFeesData(data);
+  await setData('feesData', data);
   displayFees();
-}
+};
 
-function saveEdit(index) {
+window.saveEdit = async function (index) {
   const name = document.getElementById(`edit-name-${index}`).value;
   const timing = document.getElementById(`edit-timing-${index}`).value;
   const paidDate = document.getElementById(`edit-date-${index}`).value;
-
-  if (!name || !timing || !paidDate) {
-    alert("Please fill all fields.");
-    return;
-  }
-
-  const data = getFeesData();
+  if (!name || !timing || !paidDate) return alert("Please fill all fields.");
+  const data = await getData('feesData') || [];
   data[index] = { name, timing, paidDate, paid: false };
-  saveFeesData(data);
+  await setData('feesData', data);
   displayFees();
-}
+};
 
-function markAsPaid(index) {
-  const data = getFeesData();
+window.markAsPaid = async function (index) {
+  const data = await getData('feesData') || [];
   const entry = data[index];
-
-  // Save current record to history
-  const history = getHistoryData();
+  const history = await getData('feesHistory') || {};
   if (!history[entry.name]) history[entry.name] = [];
-  history[entry.name].push({
-    paidDate: entry.paidDate,
-    timing: entry.timing
-  });
-
-  // Update paidDate to next month
-  const nextDate = getNextMonthDate(entry.paidDate);
-  data[index].paidDate = nextDate.toISOString().split('T')[0];
+  history[entry.name].push({ paidDate: new Date().toISOString().split('T')[0], timing: entry.timing });
+  data[index].paidDate = getNextMonthDate(entry.paidDate).toISOString().split('T')[0];
   data[index].paid = true;
-
-  saveFeesData(data);
-  saveHistoryData(history);
-
+  await setData('feesData', data);
+  await setData('feesHistory', history);
   displayFees();
   displayHistory();
-}
+};
 
-function displayHistory() {
+window.displayHistory = async function () {
   const container = document.getElementById("historyContainer");
   if (!container) return;
-
   container.innerHTML = "";
-
-  const history = getHistoryData();
-  Object.keys(history).forEach(name => {
+  const history = await getData('feesHistory') || {};
+  for (const name in history) {
     const div = document.createElement("div");
     div.className = "history-block";
     div.innerHTML = `<h3>${name}</h3><ul>` +
-      history[name].map(
-        (r) => `<li>Paid on: ${formatDateToDDMMYY(r.paidDate)} | Timing: ${r.timing}</li>`
-      ).join('') +
-      `</ul>`;
+      history[name].map((r, idx) => `<li>Paid on: ${formatDateToDDMMYY(r.paidDate)} | Timing: ${r.timing} <button onclick="removeHistoryEntry('${name}', ${idx})">Remove</button></li>`).join('') + `</ul>`;
     container.appendChild(div);
-  });
-}
+  }
+};
 
-document.getElementById('feesForm')?.addEventListener('submit', function (e) {
+window.removeHistoryEntry = async function (name, index) {
+  const history = await getData('feesHistory') || {};
+  if (history[name]) {
+    history[name].splice(index, 1);
+    if (history[name].length === 0) delete history[name];
+    await setData('feesHistory', history);
+    displayHistory();
+  }
+};
+
+document.getElementById('feesForm')?.addEventListener('submit', async e => {
   e.preventDefault();
   const name = document.getElementById('name').value.trim();
   const timing = document.getElementById('timing').value.trim();
   const paidDate = document.getElementById('paidDate').value;
-
   if (!name || !timing || !paidDate) return;
-
-  const data = getFeesData();
+  const data = await getData('feesData') || [];
   data.push({ name, timing, paidDate, paid: false });
-  saveFeesData(data);
-  this.reset();
+  await setData('feesData', data);
+  e.target.reset();
   displayFees();
 });
 
-displayFees();
-displayHistory();
+// ===== Seat Allocation (Morning & Afternoon) =====
+// ===== Slot Fetch + Initialize =====
+async function fetchSlots() {
+  const snap = await get(ref(db, "slots"));
+  let data = snap.exists() ? snap.val() : null;
 
-// ---------- SLOTS PAGE ----------
-function initializeSlotsIfNeeded() {
-  let slots = JSON.parse(localStorage.getItem('slots'));
-  if (!slots) {
-    slots = {
-      morning: Array(80).fill(null),
-      afternoon: Array(80).fill(null)
+  // Ensure both morning and afternoon arrays exist
+  if (!data || !data.morning || !data.afternoon) {
+    data = {
+      morning: data?.morning ?? Array(80).fill(null),
+      afternoon: data?.afternoon ?? Array(80).fill(null),
     };
-    localStorage.setItem('slots', JSON.stringify(slots));
+    await set(ref(db, "slots"), data);
   }
+
+  return data;
 }
 
-function getSlots() {
-  initializeSlotsIfNeeded();
-  return JSON.parse(localStorage.getItem('slots'));
+// ===== Save Slot Safely =====
+async function saveSlots(updatedSlots) {
+  // Re-fetch current slots to ensure no overwrite
+  const currentSlots = await fetchSlots();
+  const merged = {
+    morning: updatedSlots.morning ?? currentSlots.morning,
+    afternoon: updatedSlots.afternoon ?? currentSlots.afternoon
+  };
+  await set(ref(db, "slots"), merged);
 }
 
-function saveSlots(data) {
-  localStorage.setItem('slots', JSON.stringify(data));
-}
 
-function displaySeats() {
-  const slots = getSlots();
-  ['morning', 'afternoon'].forEach(slot => {
-    const container = document.getElementById(slot + 'Table');
-    container.innerHTML = '';
+
+window.displaySeats = async function () {
+  const slots = await fetchSlots();
+
+  ["morning", "afternoon"].forEach(slot => {
+    
+    const container = document.getElementById(slot + "Table");
+
+    if (!container) return;
+
+    container.innerHTML = "";
+
     for (let i = 0; i < 80; i++) {
       const student = slots[slot][i];
-      const seat = document.createElement('div');
-      seat.className = 'seat';
+      const seat = document.createElement("div");
+      seat.className = "seat";
+
       if (student) {
-        seat.classList.add('occupied');
+        seat.classList.add("occupied");
         seat.innerHTML = `
           <strong>${i + 1}</strong><br>${student}<br>
-          <button onclick="removeSeat('${slot}', ${i})">Remove</button>
-        `;
+          <button onclick="removeSeat('${slot}', ${i})">Remove</button>`;
       } else {
         seat.innerHTML = `<strong>${i + 1}</strong><br><em>Empty</em>`;
       }
+
       container.appendChild(seat);
     }
   });
-}
+};
 
-function assignSeat(event, slot) {
+window.assignSeat = async function (event, slot) {
   event.preventDefault();
-  const seatNo = parseInt(document.getElementById(slot + 'Seat').value, 10) - 1;
-  const name = document.getElementById(slot + 'Name').value.trim();
 
-  if (seatNo < 0 || seatNo >= 80 || !name) {
-    alert('Invalid input');
+  const seatInput = document.getElementById(`${slot}Seat`);
+  const nameInput = document.getElementById(`${slot}Name`);
+
+  if (!seatInput || !nameInput) {
+    alert("Form input not found.");
     return;
   }
 
-  const slots = getSlots();
+  const seatNo = parseInt(seatInput.value) - 1;
+  const name = nameInput.value.trim();
+
+  if (isNaN(seatNo) || seatNo < 0 || seatNo >= 80 || !name) {
+    alert("Invalid input.");
+    return;
+  }
+
+  const slots = await fetchSlots();
+
   if (slots[slot][seatNo]) {
-    alert('Seat already taken!');
+    alert("Seat already taken!");
     return;
   }
 
   slots[slot][seatNo] = name;
-  saveSlots(slots);
-  displaySeats();
-  document.getElementById(slot + 'Seat').value = '';
-  document.getElementById(slot + 'Name').value = '';
-}
+  await saveSlots(slots);
+  await displaySeats();
 
-function removeSeat(slot, index) {
-  const slots = getSlots();
+  seatInput.value = "";
+  nameInput.value = "";
+};
+
+window.removeSeat = async function (slot, index) {
+  const slots = await fetchSlots();
   slots[slot][index] = null;
-  saveSlots(slots);
-  displaySeats();
-}
+  await saveSlots(slots);
+  await displaySeats();
+};
 
-initializeSlotsIfNeeded();
-displaySeats();
+// ===== Page Load Handler =====
+window.addEventListener("DOMContentLoaded", () => {
+  displayFees();
+  displayHistory();
+  displaySeats();
+});
