@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student List</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f0f4f8;
+    }
+
+    h2 {
+      color: #333;
+    }
+
+    form {
+      margin-bottom: 20px;
+    }
+
+    input {
+      padding: 10px;
+      margin: 5px 10px 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 10px 15px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    .remove-btn {
+      background-color: #dc3545;
+    }
+
+    .remove-btn:hover {
+      background-color: #a71d2a;
+    }
+
+    .update-btn {
+      background-color: #28a745;
+    }
+
+    .update-btn:hover {
+      background-color: #1e7e34;
+    }
+  </style>
+</head>
+<body>
+
+  <button onclick="location.href='index.html'">Back to Dashboard</button>
+
+  <h2>Add or Update Student</h2>
+
+  <form id="studentForm">
+    <input type="text" id="studentName" placeholder="Name" required />
+    <input type="text" id="mobileNumber" placeholder="Mobile Number" required />
+    <input type="text" id="timing" placeholder="Timing" required />
+    <input type="text" id="seatNo" placeholder="Seat No" required />
+    <button type="submit" id="addBtn">Add Student</button>
+    <button type="button" id="updateBtn" style="display:none;">Update Student</button>
+  </form>
+
+  <h2>Student List</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>S.No</th>
+        <th>Name</th>
+        <th>Mobile</th>
+        <th>Timing</th>
+        <th>Seat No</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="studentTableBody">
+      <!-- Rows will be filled dynamically -->
+    </tbody>
+  </table>
+
+  <!-- Use Firebase-integrated script.js -->
+  <script type="module" src="script.js"></script>
+
+</body>
+</html>
